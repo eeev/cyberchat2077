@@ -85,6 +85,12 @@ public class Chat extends Practice {
 		cols.SetChildMargin(new inkMargin(20.0, 0.0, 20.0, 0.0));
 		cols.Reparent(bottom);
 
+		let cols2 = new inkHorizontalPanel();
+		cols2.SetFitToContent(true);
+		cols2.SetHAlign(inkEHorizontalAlign.Center);
+		cols2.SetChildMargin(new inkMargin(20.0, 0.0, 20.0, 0.0));
+		cols2.Reparent(top);
+
 		let input = HubTextInput.Create();
 		input.SetText("");
 		input.Reparent(cols);
@@ -106,8 +112,19 @@ public class Chat extends Practice {
 		logo.SetAnchorPoint(new Vector2(0.0, 0.0));
 		logo.SetSize(new Vector2(450.0 / 1.5, 450.0 / 1.5)); // Division for smaller images-
 		logo.SetInteractive(true);
-		logo.Reparent(top);
+		logo.Reparent(cols2);
 
+		let nameDisplay = new inkText();
+		nameDisplay.SetWrapping(true, 500.0); //700.0
+        nameDisplay.SetFitToContent(true);
+		nameDisplay.SetVAlign(inkEVerticalAlign.Center);
+        nameDisplay.SetFontFamily("base\\gameplay\\gui\\fonts\\raj\\raj.inkfontfamily");
+        nameDisplay.SetStyle(r"base\\gameplay\\gui\\common\\main_colors.inkstyle");
+        nameDisplay.BindProperty(n"tintColor", n"MainColors.Blue");
+        nameDisplay.BindProperty(n"fontWeight", n"MainColors.BodyFontWeight");
+        nameDisplay.SetFontSize(50);
+        nameDisplay.Reparent(cols2);
+		nameDisplay.SetText("Panam Palmer\n(@panam)");
 		
 		// At most ~800 characters:
         //text.SetText("Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.");
@@ -134,8 +151,8 @@ public class Chat extends Practice {
         text2.Reparent(center);
 
 		// When the popup opens, populate the text field with the last (known) message.
-		let lastResponse = "<Placeholder: Panam's response here>";
-		let lastRequest = "<Placeholder: Your message here>";
+		let lastResponse = "<Placeholder: Panam's response here. This one might be a little longer than usual. But it should still wrap around nicely.\n\nWhat if it has line breaks?>";
+		let lastRequest = "<Placeholder: Your message here. You may initiate with a loooong intro, somehow you might have a lot to talk about. BE INTERESTED. LETS GOO>";
 
 		let historyArray = GetHistory("test44");
 		let i = 0;
