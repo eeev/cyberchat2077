@@ -2,14 +2,16 @@
 
 *Cyberchat allows you to chat with in-game story-relevant NPCs in the game Cyberpunk2077. It uses OpenAI's ChatGPT advanced language model to generate responses.*
 
+![Screenshot](CyberChat.png)
+
 ## Video
 
 ## Installation
 
 1) Download the latest release and necessary requirements:
-    - [redscript](https://www.nexusmods.com/cyberpunk2077/mods/1511) ([GitHub](https://github.com/jac3km4/redscript))
-    - [RED4ext](https://www.nexusmods.com/cyberpunk2077/mods/2380) ([GitHub](https://github.com/WopsS/RED4ext))
-    - [CyberAI](https://www.nexusmods.com/cyberpunk2077/mods/8711) ([GitHub](https://github.com/kirillkuzin/cyberpunk2077ai))
+    - [redscript](https://www.nexusmods.com/cyberpunk2077/mods/1511) v0.5.14 ([GitHub](https://github.com/jac3km4/redscript))
+    - [RED4ext](https://www.nexusmods.com/cyberpunk2077/mods/2380) v1.15.0 ([GitHub](https://github.com/WopsS/RED4ext))
+    - [CyberAI](https://www.nexusmods.com/cyberpunk2077/mods/8711) v0.1.0 ([GitHub](https://github.com/kirillkuzin/cyberpunk2077ai))
         - You need to move `CyberAI.reds` to `%CyberpunkDir%\r6\scripts\CyberAI\`
 2) Extract the archive and move the `cyberchat2077` folder to
 `%CyberpunkDir%\r6\scripts\`
