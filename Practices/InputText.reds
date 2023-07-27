@@ -20,7 +20,7 @@ public class InputText extends Practice {
 
 		let label = new inkText();
 		label.SetName(n"label");
-		label.SetText(this.GetLocalizedText("InkPlayground-InputText-Input-Label"));
+		label.SetText(this.GetLocalizedText("CyberChat-InputText-Input-Label"));
 		label.SetFontFamily("base\\gameplay\\gui\\fonts\\orbitron\\orbitron.inkfontfamily");
 		label.SetFontStyle(n"Regular");
 		label.SetFontSize(25);
@@ -40,6 +40,6 @@ public class InputText extends Practice {
 	}
 
 	protected cb func OnInitialize() {
-		this.Log(this.GetLocalizedText("InkPlayground-InputText-Event-Ready"));
+		this.Log(this.GetLocalizedText("CyberChat-InputText-Event-Ready"));
 	}
 }
