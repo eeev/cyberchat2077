@@ -32,6 +32,8 @@ public class Journal extends inkCustomController {
 	}
 
 	public func AddEntry(text: String) {
+		// Void since we do not need to display UI events (only for debug purposes)
+		/*
 		let entry = new inkText();
 		entry.SetFontFamily("base\\gameplay\\gui\\fonts\\raj\\raj.inkfontfamily");
 		entry.SetFontStyle(n"Regular");
@@ -44,6 +46,7 @@ public class Journal extends inkCustomController {
 		this.TrimEntries();
 
 		LogChannel(n"DEBUG", "[CyberChat] " + text);
+		*/
 	}
 
 	protected func GetMaxEntries() -> Int32 = 7

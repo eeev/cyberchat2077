@@ -38,7 +38,7 @@ public class CyberChatPopup extends InGamePopup {
 
 		this.m_translator = LocalizationSystem.GetInstance(this.GetGame());
 
-		this.m_container.SetHeight(1400.0);
+		this.m_container.SetHeight(1600.0);
 
 		this.m_header = InGamePopupHeader.Create();
 		this.m_header.SetTitle(this.m_translator.GetText("CyberChat-Popup-Title"));
@@ -60,7 +60,8 @@ public class CyberChatPopup extends InGamePopup {
 
 		// Instantiates UI elements
 		this.m_workbench.AddPractice(new Chat());
-		this.m_workbench.AddPractice(new CursorState());
+		// No need to display cursor coordinates, except for debug purposes
+		//this.m_workbench.AddPractice(new CursorState());
 	}
 
 
