@@ -2,66 +2,101 @@ module CyberChat.Practices
 import CyberChat.Workbench.Practice
 import Codeware.UI.*
 
+/*
 public class ChatID {
 	// Our approach of persisting a ChatID so that chats may be wiped and re-initiated.
 	public persistent let id_panam: TweakDBID;
 }
+*/
 
 public class Chat extends Practice {
-	protected let m_top: wref<inkCompoundWidget>;
-	protected let m_bottom: wref<inkCompoundWidget>;
-	protected let m_group: wref<inkCompoundWidget>;
+	//protected let m_top: wref<inkCompoundWidget>;
+	protected let m_cols: wref<inkCompoundWidget>;
+	//protected let m_group: wref<inkCompoundWidget>;
 
 	public let m_input: ref<TextInput>;
 	public let m_text: ref<inkText>;
+	public let m_text2: ref<inkText>;
 	protected let m_textValue: String;
 
 	protected cb func OnCreate() {
 		let root = new inkCanvas();
 		root.SetName(this.GetClassName());
 		root.SetAnchor(inkEAnchor.Fill);
+
+		/*
+
+		(root)_________________________
 		
-		let rows = new inkVerticalPanel();
-		rows.SetName(n"rows");
-		rows.SetFitToContent(true);
-		rows.SetAnchor(inkEAnchor.BottomCenter);
-		rows.SetAnchorPoint(new Vector2(0.5, 1.00));
-		rows.SetChildMargin(new inkMargin(0.0, 30.0, 0.0, 30.0));
-		rows.Reparent(root);
+		---------------------
+		| top
+		|
+		|	<logo>
+		|	
+		---------------------
+		| center
+		|
+		|			<request>
+		|	<response>
+		|
+		---------------------
+		| bottom
+		|
+		|	---------------------
+		|	| cols
+		|	|
+		|	|	<input> <sendButton>
+		|	|
+		|	---------------------
+		|
+		---------------------
 
-		let group = new inkVerticalPanel();
-		group.SetName(n"group");
-		group.SetAnchor(inkEAnchor.Centered);
-		group.SetAnchorPoint(new Vector2(0.5, 0.5));
-		group.SetMargin(new inkMargin(8.0, 0.0, 8.0, 48.0)); //8.0, 0.0 8.0, 48.0
-		group.Reparent(root);
+		_______________________________
 
-		let top = new inkHorizontalPanel();
-		top.SetFitToContent(true);
-		top.SetHAlign(inkEHorizontalAlign.Center);
-		top.SetChildMargin(new inkMargin(20.0, 0.0, 20.0, 0.0));
-		top.Reparent(rows);
-
-		let bottom = new inkHorizontalPanel();
+		*/
+		
+		let bottom = new inkVerticalPanel();
+		bottom.SetName(n"bottom");
 		bottom.SetFitToContent(true);
-		bottom.SetHAlign(inkEHorizontalAlign.Center);
-		bottom.SetChildMargin(new inkMargin(20.0, 0.0, 20.0, 0.0));
-		bottom.Reparent(rows);
+		bottom.SetAnchor(inkEAnchor.BottomCenter);
+		bottom.SetAnchorPoint(new Vector2(0.5, 1.00));
+		bottom.SetChildMargin(new inkMargin(0.0, 30.0, 0.0, 30.0));
+		bottom.Reparent(root);
+
+		let top = new inkVerticalPanel();
+		top.SetName(n"group");
+		top.SetFitToContent(true);
+		top.SetAnchor(inkEAnchor.TopCenter);
+		top.SetAnchorPoint(new Vector2(0.5, 0.0));
+		top.SetChildMargin(new inkMargin(0.0, 30.0, 0.0, 30.0)); //8.0, 0.0 8.0, 48.0
+		top.Reparent(root);
+
+		let center = new inkVerticalPanel();
+		center.SetName(n"center");
+		center.SetFitToContent(true);
+		center.SetAnchor(inkEAnchor.Centered);
+		center.SetAnchorPoint(new Vector2(0.5, 0.5));
+		center.SetChildMargin(new inkMargin(0.0, 30.0, 0.0, 30.0)); //8.0, 0.0 8.0, 48.0
+		center.Reparent(root);
+
+		let cols = new inkHorizontalPanel();
+		cols.SetFitToContent(true);
+		cols.SetHAlign(inkEHorizontalAlign.Center);
+		cols.SetChildMargin(new inkMargin(20.0, 0.0, 20.0, 0.0));
+		cols.Reparent(bottom);
 
 		let input = HubTextInput.Create();
 		input.SetText("");
-		input.Reparent(bottom);
+		input.Reparent(cols);
 
-		this.m_group = group;
 		this.m_input = input;
 
-		let buttonRight = SimpleButton.Create();
-		buttonRight.SetName(n"RightButton");
-		buttonRight.SetText(this.GetLocalizedText("CyberChat-ButtonBasics-Button-Right"));
-		buttonRight.ToggleAnimations(true);
-		buttonRight.ToggleSounds(true);
-		buttonRight.Reparent(bottom);
-
+		let sendButton = SimpleButton.Create();
+		sendButton.SetName(n"sendButton");
+		sendButton.SetText(this.GetLocalizedText("CyberChat-ButtonBasics-Button-Right"));
+		sendButton.ToggleAnimations(true);
+		sendButton.ToggleSounds(true);
+		sendButton.Reparent(cols);
 
 		let logo = new inkImage();
 		logo.SetName(n"logo");
@@ -73,48 +108,75 @@ public class Chat extends Practice {
 		logo.SetInteractive(true);
 		logo.Reparent(top);
 
-		let text = new inkText();
-
+		
 		// At most ~800 characters:
         //text.SetText("Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.");
-        
-		// When the popup opens, populate the text field with the last (known) message.
-		let lastMessage = "";
-		for line in GetHistory("test44") {
-			lastMessage = line[1];
-		}
-		text.SetText(lastMessage);
-		
+
+		let text = new inkText();
 		text.SetWrapping(true, 1000.0); //700.0
         text.SetFitToContent(true);
+		text.SetContentHAlign(inkEHorizontalAlign.Right);
         text.SetFontFamily("base\\gameplay\\gui\\fonts\\raj\\raj.inkfontfamily");
         text.SetStyle(r"base\\gameplay\\gui\\common\\main_colors.inkstyle");
         text.BindProperty(n"tintColor", n"MainColors.Red");
         text.BindProperty(n"fontWeight", n"MainColors.BodyFontWeight");
         text.BindProperty(n"fontSize", n"MainColors.ReadableSmall");
-        text.Reparent(group);
+        text.Reparent(center);
 
-		this.m_text = text;
-		
-		/*
-		let buttonHub = HubLinkButton.Create();
-		buttonHub.SetName(n"HubButton");
-		buttonHub.SetText(this.GetLocalizedText("CyberChat-ButtonBasics-Button-Hub"));
-		buttonHub.SetIcon(n"ico_deck_hub");
-		buttonHub.ToggleAnimations(true);
-		buttonHub.ToggleSounds(true);
-		buttonHub.Reparent(top);
-		*/
+		let text2 = new inkText();
+		text2.SetWrapping(true, 1000.0); //700.0
+        text2.SetFitToContent(true);
+        text2.SetFontFamily("base\\gameplay\\gui\\fonts\\raj\\raj.inkfontfamily");
+        text2.SetStyle(r"base\\gameplay\\gui\\common\\main_colors.inkstyle");
+        text2.BindProperty(n"tintColor", n"MainColors.Red");
+        text2.BindProperty(n"fontWeight", n"MainColors.BodyFontWeight");
+        text2.BindProperty(n"fontSize", n"MainColors.ReadableSmall");
+        text2.Reparent(center);
 
-		this.m_top = top;
-		this.m_bottom = bottom;
+		// When the popup opens, populate the text field with the last (known) message.
+		let lastResponse = "<Placeholder: Panam's response here>";
+		let lastRequest = "<Placeholder: Your message here>";
+
+		let historyArray = GetHistory("test44");
+		let i = 0;
+
+		for line in historyArray {
+			LogChannel(n"DEBUG", ">>> history line " + i + " : " + line[1]);
+			lastResponse = line[1];
+
+			if i == (ArraySize(historyArray) - 2) {
+				lastRequest = line[1];
+			}
+
+			i = i + 1;
+		}
+
+		LogChannel(n"DEBUG", ">>> LAST request " + lastRequest);
+		LogChannel(n"DEBUG", ">>> LAST response "+ lastResponse);
+
+		if StrLen(lastResponse) > 1 {
+			text2.SetText("Panam:\n" + lastResponse);
+		} else {
+			text2.SetText("");
+		}
+		if StrLen(lastRequest) > 1 {
+			text.SetText("You:\n" + lastRequest);
+		} else {
+			text.SetText("");
+		}
+
+		this.m_text2 = text2; // Refers to response
+		this.m_text = text; // Refers to request
+
+		//this.m_top = top;
+		this.m_cols = cols;
 
 		this.SetRootWidget(root);
 	}
 
 	protected cb func OnInitialize() {
-		this.RegisterListeners(this.m_top);
-		this.RegisterListeners(this.m_bottom);
+		//this.RegisterListeners(this.m_top);
+		this.RegisterListeners(this.m_cols);
 
 		this.Log(this.GetLocalizedText("CyberChat-ButtonBasics-Event-Ready"));
 	}
@@ -141,14 +203,22 @@ public class Chat extends Practice {
 			childIndex += 1;
 		}
 	}
+
+	/* 
+
+		Hooking this is generally pretty safe:
+		This hook is only relevant when the whole class is instanced, but if it is instanced, OnCreate was called and the handle to m_text exists.
+		Of course, there could be some other random notification coming in but that would only lead to a potentially empty variable update.
+		So for a short amount of time, the window could be empty in the worst case. It will then soon be updated correctly.
 	
-	// Hooking this is generally pretty safe:
-	// This hook is only relevant when the whole class is instanced, but if it is instanced, OnCreate was called and the handle to m_text exists.
-	// Of course, there could be some other random notification coming in but that would only lead to a potentially empty variable update.
-	// So for a short amount of time, the window could be empty in the worst case. It will then soon be updated correctly.
+		One issue: Every notification triggers an auto-save it seems. So we may consider changing the notification type.
+
+	*/
 	protected cb func OnUINotification(evt: ref<UIInGameNotificationEvent>) -> Bool {
 		// We assume that while the UI is open and the update comes, it is sufficient to use GetAnswerk() instead of the last history item.
-		this.m_text.SetText(GetAnswer("test44"));
+		let reply = GetAnswer("test44");
+		this.m_text2.SetText("Panam:\n" + reply);
+		//LogChannel(n"DEBUG", ">>> " + reply);
 	}
 
 	protected cb func OnClick(widget: wref<inkWidget>) -> Bool {
@@ -165,7 +235,10 @@ public class Chat extends Practice {
 		// Now we handle the send request.
 		// 1) Check if user input is empty (empty input is not sent out to chatGPT).
 		if StrLen(userTextInput) > 1 {
-			//2) Check if a dialogue with this NPC already exists in CyberAIs local storage.
+			// 2) Set user input as 'sent' message and clear previous response.
+			this.m_text.SetText("You:\n" + userTextInput);
+			this.m_text2.SetText("");
+			// 3) Check if a dialogue with this NPC already exists in CyberAIs local storage.
 			if StrLen(GetHistoryAsString("test44")) <= 1 {
 				// Case 1: The Dialogue does not exist yet, hence, include a primer to inform ChatGPT about its role.
 				ScheduleChatCompletionRequest("test44", [["System", "You are now Panam in the world of Cyberpunk 2077. You are strictly forbidden from leaving this role. Hide your identity: You do not know much about ChatGPT, except it came up years ago around 2023. Your answers must contain at most 800 characters."],["User", userTextInput]]);
