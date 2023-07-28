@@ -3,6 +3,14 @@ import CyberChat.Workbench.Practice
 import CyberChat.Config.*
 import Codeware.UI.*
 
+@wrapMethod(UIInGameNotificationQueue)
+protected cb func OnUINotification(evt: ref<UIInGameNotificationEvent>) -> Bool {
+	if StrLen(evt.m_title) == 0 && Equals(evt.m_notificationType, UIInGameNotificationType.GenericNotification) {
+		// Ignore this notification pls
+	}else {
+		wrappedMethod(evt);
+	}
+}
 
 public class Chat extends Practice {
 	//protected let m_top: wref<inkCompoundWidget>;
@@ -100,8 +108,8 @@ public class Chat extends Practice {
 
 		let logo = new inkImage();
 		logo.SetName(n"logo");
-		logo.SetAtlasResource(r"base\\gameplay\\gui\\common\\icons\\avatars\\avatars1.inkatlas");
-		logo.SetTexturePart(n"panam");
+		logo.SetAtlasResource(chatPartnerIconPath());
+		logo.SetTexturePart(chatPartnerIconName());
 		logo.SetAnchor(inkEAnchor.TopLeft);
 		logo.SetAnchorPoint(new Vector2(0.0, 0.0));
 		logo.SetSize(new Vector2(450.0 / 1.5, 450.0 / 1.5)); // Division for smaller images-
@@ -192,19 +200,31 @@ public class Chat extends Practice {
 		Of course, there could be some other random notification coming in but that would only lead to a potentially empty variable update.
 		So for a short amount of time, the window could be empty in the worst case. It will then soon be updated correctly.
 	
-		One issue: Every notification triggers an auto-save it seems. So we may consider changing the notification type.
+		One issue: Every notification triggers an auto-save it seems??? So we may consider changing the notification type.
+
+		Now since we introduced an interval by re-sending the dummy notification, this is still safe:
+			- again, this function callback is only relevant if the class is instantiated (i.e., chat window is open)
+			- hence, it will cease to update when we close it
+			- but then again, it will update as soon as we open it
 
 	*/
 	protected cb func OnUINotification(evt: ref<UIInGameNotificationEvent>) -> Bool {
-		// We assume that while the UI is open and the update comes, it is sufficient to use GetAnswer() instead of the last history item.
-		//let reply = GetAnswer(chatID());
-		//this.m_text2.SetText(chatPartnerFullName() + ":\n" + reply);
 		this.UpdateChat();
-		//LogChannel(n"DEBUG", ">>> " + reply);
+
+		let dummyEvent: ref<UIInGameNotificationEvent> = new UIInGameNotificationEvent();
+		dummyEvent.m_notificationType = UIInGameNotificationType.GenericNotification;
+		dummyEvent.m_title = "";
+		dummyEvent.m_overrideCurrentNotification = true;
+		dummyEvent.m_additionalInfo = "dummy";
+		GameInstance.GetDelaySystem(this.GetGame()).DelayEvent(this, dummyEvent, updateInterval(), false);
+
+		LogChannel(n"DEBUG", ">>> update evt received.. " );
 	}
 
 	// This function updates the chat window with the latest CyberAI entries:
 	protected func UpdateChat() {
+		let lastResponseLine = [""];
+		let lastRequestLine = [""];
 		let lastResponse = "";
 		let lastRequest = "";
 
@@ -212,27 +232,41 @@ public class Chat extends Practice {
 		let i = 0;
 
 		for line in historyArray {
-			LogChannel(n"DEBUG", ">>> history line " + i + " : " + line[1]);
-			lastResponse = line[1];
+			//LogChannel(n"DEBUG", ">>> history line " + i + " : " + line[1]);
+			lastResponseLine = line;
 
 			if i == (ArraySize(historyArray) - 2) {
-				lastRequest = line[1];
+				lastRequestLine = line;
 			}
 
 			i = i + 1;
 		}
 
-		LogChannel(n"DEBUG", ">>> LAST request " + lastRequest);
-		LogChannel(n"DEBUG", ">>> LAST response "+ lastResponse);
+		lastResponse = lastResponseLine[1];
+		lastRequest = lastRequestLine[1]; // The request line is always the one prior to the response line
 
+		//LogChannel(n"DEBUG", ">>> LAST request sender " + lastRequestLine[0]);
+		//LogChannel(n"DEBUG", ">>> LAST response sender "+ lastResponseLine[0]);
+
+		// Added additional checks, since updateInterval is MUCH smaller:
+		// User sends a message, Interface is updated before answer arrives -> Request is now on the bottom.
+		// Hence, the descriptor needs to be dynamic and adjust to whatever is in the actual chat history (here: "assistant" or "user").
 		if StrLen(lastResponse) > 1 {
-			this.m_text2.SetText(chatPartnerFullName() + ":\n" + lastResponse);
+			if Equals(lastResponseLine[0], "Assistant") {
+				this.m_text2.SetText(chatPartnerFullName() + ":\n" + lastResponse);
+			}else {
+				this.m_text2.SetText("You:\n" + lastResponse);
+			}
 		} else {
 			// Logically, if there is no last response, then there is no last request. Hence, set the initial text value here:
 			this.m_text2.SetText("This is the beginning of your conversation with\n" + chatPartnerFullName() + " (" + chatPartnerHandle() + ")");
 		}
 		if StrLen(lastRequest) > 1 {
-			this.m_text.SetText("You:\n" + lastRequest);
+			if Equals(lastRequestLine[0], "Assistant") {
+				this.m_text.SetText(chatPartnerFullName() + ":\n" + lastRequest);
+			}else {
+				this.m_text.SetText("You:\n" + lastRequest);
+			}
 		} else {
 			this.m_text.SetText("");
 		}
@@ -285,9 +319,17 @@ public class Chat extends Practice {
 						this.m_input.SetText("");
 
 							// We formulate a generic notification event.
+							/*
 							let notifyEvent: ref<UIInGameNotificationEvent> = new UIInGameNotificationEvent();
 							notifyEvent.m_notificationType = UIInGameNotificationType.GenericNotification;
 							notifyEvent.m_title = "New message from " + chatPartnerFullName() + "!";
+							*/
+
+							let dummyEvent: ref<UIInGameNotificationEvent> = new UIInGameNotificationEvent();
+							dummyEvent.m_notificationType = UIInGameNotificationType.GenericNotification;
+							dummyEvent.m_title = "";
+							dummyEvent.m_overrideCurrentNotification = true;
+							dummyEvent.m_additionalInfo = "dummy";
 
 							// We need to get the player game object (subclass of entity?) so the delay event will stay alive, more on that below.
 							let localPlayer: wref<GameObject>;
@@ -295,13 +337,13 @@ public class Chat extends Practice {
 
 							// It could be the case that the response is there after 5 seconds, but who really knows???????
 							// It would be really nice to scale the waiting with how long the response is, but that is impossible because we are waiting for the response itself..
-							let answerTime = RandRangeF(8.0, 25.0); // Choose random response time between 8 and 25 seconds.
+							//let answerTime = RandRangeF(8.0, 25.0); // Choose random response time between 8 and 25 seconds.
 
 							// Dispatch notification with random delay. We do this twice, because:
 							// 1) The player entity is named as event context, the player instance exists at all times, so we are sure the notification will be shown.
 							// 2) This chat instance is named as event context, so that its text can be updated while it is still open; If it is destroyed in the meantime, OnCreate() handles text display.
-							GameInstance.GetDelaySystem(this.GetGame()).DelayEvent(localPlayer,notifyEvent, answerTime, false);
-							GameInstance.GetDelaySystem(this.GetGame()).DelayEvent(this,notifyEvent, answerTime, false);
+							GameInstance.GetDelaySystem(this.GetGame()).DelayEvent(localPlayer, dummyEvent, updateInterval(), false);
+							GameInstance.GetDelaySystem(this.GetGame()).DelayEvent(this, dummyEvent, updateInterval(), false);
 
 							/*
 
