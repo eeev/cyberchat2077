@@ -3,15 +3,25 @@ import CyberChat.Workbench.Practice
 import CyberChat.Config.*
 import Codeware.UI.*
 
+// Little workaround to stop displaying our dummy notifications
 @wrapMethod(UIInGameNotificationQueue)
 protected cb func OnUINotification(evt: ref<UIInGameNotificationEvent>) -> Bool {
 	if StrLen(evt.m_title) == 0 && Equals(evt.m_notificationType, UIInGameNotificationType.GenericNotification) {
-		// Ignore this notification pls
+		// Ignore all notifications with an empty title pls
+		// Proof that gamedevs do not use the same workaround: Even notifications with an empty title are displayed
+		// SHOULD be safe for now..
 	}else {
+		// Continue handling, else we won't receive any notifications anymore
 		wrappedMethod(evt);
 	}
 }
 
+/*
+
+	The Chat class brings all chat window components, their layout and logic handling.
+	It also maintains a loop to refresh the interface periodically, as dictated by the updateInterval() in the config.
+
+*/
 public class Chat extends Practice {
 	//protected let m_top: wref<inkCompoundWidget>;
 	protected let m_cols: wref<inkCompoundWidget>;
@@ -130,6 +140,8 @@ public class Chat extends Practice {
 		
 		// At most ~800 characters:
         //text.SetText("Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.");
+		// Note that this number only applies to a single response text field, if we trick the system we can get two in a row
+		// which adds up to more than 800, hence the text will glitch outside its boundaries.. might fix in the future..
 
 		let text = new inkText();
 		text.SetWrapping(true, 1000.0); //700.0
@@ -165,7 +177,7 @@ public class Chat extends Practice {
 
 	protected cb func OnInitialize() {
 		//this.RegisterListeners(this.m_top);
-		this.RegisterListeners(this.m_cols);
+		this.RegisterListeners(this.m_cols); // Meaning mostly button callback registering, see below
 
 		this.Log(this.GetLocalizedText("CyberChat-ButtonBasics-Event-Ready"));
 	}
@@ -218,11 +230,21 @@ public class Chat extends Practice {
 		dummyEvent.m_additionalInfo = "dummy";
 		GameInstance.GetDelaySystem(this.GetGame()).DelayEvent(this, dummyEvent, updateInterval(), false);
 
-		LogChannel(n"DEBUG", ">>> update evt received.. " );
+		//LogChannel(n"DEBUG", ">>> update evt received.. " );
 	}
 
 	// This function updates the chat window with the latest CyberAI entries:
 	protected func UpdateChat() {
+		/*
+
+			To elaborate on the terminology of response/request:
+				- there are only two text fields which are labeled accordingly
+				- they may be populated differently than request/response originally indicated
+				- hence, request line is simply the last chat history line prior to the response line
+				- the response line is simply the last chat history entry
+				- these can both be sent by either the user directly, or responses received from OpenAI
+
+		*/
 		let lastResponseLine = [""];
 		let lastRequestLine = [""];
 		let lastResponse = "";
@@ -248,9 +270,13 @@ public class Chat extends Practice {
 		//LogChannel(n"DEBUG", ">>> LAST request sender " + lastRequestLine[0]);
 		//LogChannel(n"DEBUG", ">>> LAST response sender "+ lastResponseLine[0]);
 
-		// Added additional checks, since updateInterval is MUCH smaller:
-		// User sends a message, Interface is updated before answer arrives -> Request is now on the bottom.
-		// Hence, the descriptor needs to be dynamic and adjust to whatever is in the actual chat history (here: "assistant" or "user").
+		/*
+
+			Added additional checks, since updateInterval is MUCH smaller:
+			User sends a message, Interface is updated before answer arrives -> Request is now on the bottom (used to be always on top).
+			Hence, the descriptor needs to be dynamic and adjust to whatever is in the actual chat history (here: "Assistant" or "User").
+		
+		*/
 		if StrLen(lastResponse) > 1 {
 			if Equals(lastResponseLine[0], "Assistant") {
 				this.m_text2.SetText(chatPartnerFullName() + ":\n" + lastResponse);
@@ -258,7 +284,7 @@ public class Chat extends Practice {
 				this.m_text2.SetText("You:\n" + lastResponse);
 			}
 		} else {
-			// Logically, if there is no last response, then there is no last request. Hence, set the initial text value here:
+			// Logically, if there is no last response, then there is no last request. Therefore, set the initial text value here:
 			this.m_text2.SetText("This is the beginning of your conversation with\n" + chatPartnerFullName() + " (" + chatPartnerHandle() + ")");
 		}
 		if StrLen(lastRequest) > 1 {
@@ -291,7 +317,7 @@ public class Chat extends Practice {
 				case "/flush":
 					this.m_input.SetText("");
 
-					LogChannel(n"DEBUG", "[CyberChat] Flushing chat with id" + chatID());
+					LogChannel(n"DEBUG", "[CyberChat] Flushing chat with id " + chatID());
 					FlushChat(chatID());
 					this.UpdateChat();
 
@@ -299,6 +325,7 @@ public class Chat extends Practice {
 				case "/update":
 					this.m_input.SetText("");
 
+					LogChannel(n"DEBUG", "[CyberChat] Manual update requested");
 					this.UpdateChat();
 
 					break;
@@ -318,13 +345,14 @@ public class Chat extends Practice {
 						// Wanted functionality; after sending anything, clear the text input so we don't have to do it manually each time & input is not sent twice accidentally.
 						this.m_input.SetText("");
 
-							// We formulate a generic notification event.
+							// We formulate a generic notification event (old!)
 							/*
 							let notifyEvent: ref<UIInGameNotificationEvent> = new UIInGameNotificationEvent();
 							notifyEvent.m_notificationType = UIInGameNotificationType.GenericNotification;
 							notifyEvent.m_title = "New message from " + chatPartnerFullName() + "!";
 							*/
 
+							// We formulate a dummy notification event
 							let dummyEvent: ref<UIInGameNotificationEvent> = new UIInGameNotificationEvent();
 							dummyEvent.m_notificationType = UIInGameNotificationType.GenericNotification;
 							dummyEvent.m_title = "";
@@ -335,27 +363,21 @@ public class Chat extends Practice {
 							let localPlayer: wref<GameObject>;
 							localPlayer = GameInstance.GetPlayerSystem(this.GetGame()).GetLocalPlayerMainGameObject();
 
-							// It could be the case that the response is there after 5 seconds, but who really knows???????
-							// It would be really nice to scale the waiting with how long the response is, but that is impossible because we are waiting for the response itself..
-							//let answerTime = RandRangeF(8.0, 25.0); // Choose random response time between 8 and 25 seconds.
-
-							// Dispatch notification with random delay. We do this twice, because:
-							// 1) The player entity is named as event context, the player instance exists at all times, so we are sure the notification will be shown.
-							// 2) This chat instance is named as event context, so that its text can be updated while it is still open; If it is destroyed in the meantime, OnCreate() handles text display.
-							GameInstance.GetDelaySystem(this.GetGame()).DelayEvent(localPlayer, dummyEvent, updateInterval(), false);
+							// This used to be done twice but currently, there is no need for it
+							//GameInstance.GetDelaySystem(this.GetGame()).DelayEvent(localPlayer, dummyEvent, updateInterval(), false);
 							GameInstance.GetDelaySystem(this.GetGame()).DelayEvent(this, dummyEvent, updateInterval(), false);
 
 							/*
 
 								There are 2 cases that need to be covered after the delayed message is dispatched:
 									a) The popup is closed within 8 seconds. Hence, this handle is destroyed and cannot enter the response.
-										=> The 'new message' event is still dispatched & the popup UI updated on next launch (OK)
+										=> Once the popup is opened again, it will updateChat() => OK
 									b) The popup remains open as the user expects the response to show up.
-										=> The 'new message' event is still dispatched & the popup UI receives an update with the response because its context 
-										is still delivered in the second dispatched event. (OK)
+										=> The dummy event is dispatched & the popup UI receives an update with the response because its context 
+										is still delivered in the second dispatched event
+										=> The dummy event will call itself again after updateInterval() and at some point updateChat() => (OK)
 
-								A little workaround but it remains still relatively efficient. The question remains, since a queue is used, whether these events are in 
-								the way of each other.
+								A little workaround but it remains still relatively efficient.
 
 							*/
 					break;
