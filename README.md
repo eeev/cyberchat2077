@@ -23,3 +23,27 @@
 
 - While not in a vehicle, press and hold `R` (car radio button) to open the chat
 - You can now chat with story-relevant NPCs
+
+### Configuration
+
+You can edit certain variables in `.\Config\CyberChatConfig.reds` that affect the behaviour of Cyberchat:
+
+| Variable  | Description | Example |
+| ------------- | ------------- | ------------- |
+| `updateInterval`  | While Cyberchat is open and after the user sent a message: The interval (in seconds) in which to check for responses | 2.0 |
+| `chatID`  | A unique id assigned to this chat | "@panam" |
+| `chatPartnerFullName`  | The full name of the chat partner | "Panam Palmer" |
+| `chatPartnerHandle`  | Some unique handle to identify this chat partner | "@panam" |
+| `chatPartnerIconPath`  | A resource identifier for the icon to be displayed for this chat partner | r"base\\gameplay\\gui\\common\\icons\\avatars\\avatars1.inkatlas" |
+| `chatPartnerIconName`  | The specific icon name for this chat partner | n"panam" |
+| `chatPartnerGPTPrimer`  | The partner-specific primer to dictate the role of the language model | "You are now Panam in the world of Cyberpunk 2077. [...]" |
+| `chatGeneralGPTPrimer`  | A primer for the language model to restrict its knowledge | "Respond confused or irritated when asked about any knowledge you do not possess! [...]" |
+
+### Commands
+
+You can execute relevant commands by sending them as chat messages:
+
+| Command  | Description |
+| ------------- | ------------- |
+| `/flush`  | Calls CyberAI's `FlushChat("id")` function to 'delete' chat history |
+| `/update`  | Updates displayed chat messages with chat information from CyberAI  |
