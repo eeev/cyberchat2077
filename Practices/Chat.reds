@@ -336,7 +336,7 @@ public class Chat extends Practice {
 					// 4) Check if a dialogue with this NPC already exists in CyberAIs local storage.
 					if StrLen(GetHistoryAsString(chatID())) <= 1 {
 						// Case 1: The Dialogue does not exist yet, hence, include a primer to inform ChatGPT about its role.
-						ScheduleChatCompletionRequest(chatID(), [["System", chatPartnerGPTPrimer()],["User", userTextInput]]);
+						ScheduleChatCompletionRequest(chatID(), [["System", chatPartnerGPTPrimer()],["System", chatGeneralGPTPrimer()],["User", userTextInput]]);
 					} else {
 						// Case 2: Simply send user input towards the existing conversation. This saves a lot of tokens over time.
 						ScheduleChatCompletionRequest(chatID(), [["User", userTextInput]]);
