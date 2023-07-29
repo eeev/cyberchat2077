@@ -15,6 +15,8 @@
         - You need to move `CyberAI.reds` to `%CyberpunkDir%\r6\scripts\CyberAI\`
         - Make sure CyberAI is set up correctly:
             - Set your *api_key* and *org_id* in `Settings.json`
+    - cyberchat-ext v0.0.1 ([GitHub](https://github.com/eeev/cyberchat2077-ext))
+
 2) Extract the archive and move the `cyberchat2077` folder to
 `%CyberpunkDir%\r6\scripts\`
     - Alternatively, add the whole `.zip` file in [Vortex](https://www.nexusmods.com/about/vortex/?)
