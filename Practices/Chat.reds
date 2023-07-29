@@ -280,8 +280,12 @@ public class Chat extends Practice {
 		if StrLen(lastResponse) > 1 {
 			if Equals(lastResponseLine[0], "Assistant") {
 				this.m_text2.SetText(chatPartnerFullName() + ":\n" + lastResponse);
-			}else {
+			}else if Equals(lastResponseLine[0], "User") {
 				this.m_text2.SetText("You:\n" + lastResponse);
+			}else {
+				// Debug only! Normally we would hide system messages, they only provide primer or continuity information.
+				//this.m_text2.SetText("<" + lastResponse + ">");
+				this.m_text2.SetText("");
 			}
 		} else {
 			// Logically, if there is no last response, then there is no last request. Therefore, set the initial text value here:
@@ -290,8 +294,12 @@ public class Chat extends Practice {
 		if StrLen(lastRequest) > 1 {
 			if Equals(lastRequestLine[0], "Assistant") {
 				this.m_text.SetText(chatPartnerFullName() + ":\n" + lastRequest);
-			}else {
+			}else if Equals(lastRequestLine[0], "User") {
 				this.m_text.SetText("You:\n" + lastRequest);
+			}else {
+				// Debug only! See above.
+				//this.m_text.SetText("<" + lastRequest + ">");
+				this.m_text.SetText("");
 			}
 		} else {
 			this.m_text.SetText("");
