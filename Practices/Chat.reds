@@ -32,6 +32,43 @@ public class Chat extends Practice {
 	public let m_text2: ref<inkText>;
 
 	protected cb func OnCreate() {
+		/*
+
+			Get chat-relevant data
+
+		*/
+		LogChannel(n"DEBUG", "[CyberChat] Retrieving existing chats..");
+
+		// Existing chats are created as TweakDB entries by cyberchat2077-ext upon loading into a save game
+		// They exist session-based, like chats themselves
+		/*
+		for record in TweakDBInterface.GetRecords(n"Website_Record") {
+			let currentUrl = ToString((record as Website_Record).Url());
+        	
+			LogChannel(n"DEBUG", "[CyberChat] Found chat_id: " + currentUrl);
+			// Since CyberChat indices are handles, we can simply scan for those URLs starting with '@'
+			// Should be safe since the game probably will not use this workaround itself.
+			/*
+			if StrBeginsWith(currentUrl, "@") {
+				LogChannel(n"DEBUG", "[CyberChat] Found chat with id: " + currentUrl);
+			}
+			*/
+				
+    	}
+		*/
+		let flat = TweakDBInterface.GetFlat(t"CyberChat.Panam_handle");
+		if IsDefined(flat) {
+			LogChannel(n"DEBUG", "[CyberChat] Found panam handle: " + ToString(flat));
+		}else {
+			LogChannel(n"DEBUG", "[CyberChat] Could not find handle :(");
+		}
+		
+
+		/*
+
+			Create UI components
+
+		*/
 		let root = new inkCanvas();
 		root.SetName(this.GetClassName());
 		root.SetAnchor(inkEAnchor.Fill);
@@ -330,10 +367,29 @@ public class Chat extends Practice {
 					this.UpdateChat();
 
 					break;
+				case "/hide":
+					this.m_input.SetText("");
+
+					LogChannel(n"DEBUG", "[CyberChat] Hiding.. ");
+					let canvas = this.GetRootWidget();
+					canvas.SetVisible(false);
+					// works..
+
+					break;
 				case "/update":
 					this.m_input.SetText("");
 
 					LogChannel(n"DEBUG", "[CyberChat] Manual update requested");
+					this.UpdateChat();
+
+					break;
+				case "/judy":
+					this.m_input.SetText("");
+
+					this.m_text.SetText("You:\n" + userTextInput);
+					this.m_text2.SetText("");
+					ScheduleChatCompletionRequest("@judy", [["User","One sentence: Why are we here?"]]);
+					LogChannel(n"DEBUG", "[CyberChat] Sent to judy as a test");
 					this.UpdateChat();
 
 					break;
