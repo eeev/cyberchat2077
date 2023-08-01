@@ -445,29 +445,10 @@ public class Chat extends Practice {
 						this.UpdateChat();
 
 						break;
-					case "/hide":
-						this.m_input.SetText("");
-
-						LogChannel(n"DEBUG", "[CyberChat] Hiding.. ");
-						let canvas = this.GetRootWidget();
-						canvas.SetVisible(false);
-						// works..
-
-						break;
 					case "/update":
 						this.m_input.SetText("");
 
 						LogChannel(n"DEBUG", "[CyberChat] Manual update requested");
-						this.UpdateChat();
-
-						break;
-					case "/judy":
-						this.m_input.SetText("");
-
-						this.m_text.SetText("You:\n" + userTextInput);
-						this.m_text2.SetText("");
-						ScheduleChatCompletionRequest("@judy", [["User","One sentence: Why are we here?"]]);
-						LogChannel(n"DEBUG", "[CyberChat] Sent to judy as a test");
 						this.UpdateChat();
 
 						break;
