@@ -106,7 +106,7 @@ public class Chat extends Practice {
 		this.m_hashMap = hashMap;
 
 		// There needs to be a default chat to show initially.
-		this.m_displayedChatHandle = "@panam";
+		this.m_displayedChatHandle = "(void)";
 
 		/*
 
@@ -182,7 +182,6 @@ public class Chat extends Practice {
 		center.SetChildMargin(new inkMargin(0.0, 30.0, 0.0, 30.0)); //8.0, 0.0 8.0, 48.0
 		center.Reparent(root);
 
-		// This is all within compartments in the right panel:
 		let cols = new inkHorizontalPanel();
 		cols.SetFitToContent(true);
 		cols.SetHAlign(inkEHorizontalAlign.Center);
@@ -221,10 +220,10 @@ public class Chat extends Practice {
 		let logo = new inkImage();
 		logo.SetName(n"logo");
 		logo.SetAtlasResource(chatPartnerIconPath());
-		logo.SetTexturePart(n"panam"); // Hard-coded for the same reason as above: Some default value has to be set!
+		logo.SetTexturePart(n""); // Hard-coded for the same reason as above: Some default value has to be set!
 		logo.SetAnchor(inkEAnchor.TopLeft);
 		logo.SetAnchorPoint(new Vector2(0.0, 0.0));
-		logo.SetSize(new Vector2(450.0 / 1.5, 450.0 / 1.5)); // Division for smaller images-
+		logo.SetSize(new Vector2(0.1, 0.1)); // Division for smaller images-
 		logo.SetInteractive(true);
 		logo.Reparent(cols2);
 		this.m_logo = logo;
@@ -239,7 +238,7 @@ public class Chat extends Practice {
         nameDisplay.BindProperty(n"fontWeight", n"MainColors.BodyFontWeight");
         nameDisplay.SetFontSize(50);
         nameDisplay.Reparent(cols2);
-		nameDisplay.SetText("Panam Palmer" + "\n" + "(@panam)"); // Hard-coded for the same reason as above: Some default value has to be set!
+		nameDisplay.SetText("Welcome, V!"); // Hard-coded for the same reason as above: Some default value has to be set!
 		this.m_nameDisplay = nameDisplay;
 
 		// At most ~800 characters:
@@ -315,8 +314,6 @@ public class Chat extends Practice {
 		This hook is only relevant when the whole class is instanced, but if it is instanced, OnCreate was called and the handle to m_text exists.
 		Of course, there could be some other random notification coming in but that would only lead to a potentially empty variable update.
 		So for a short amount of time, the window could be empty in the worst case. It will then soon be updated correctly.
-	
-		One issue: Every notification triggers an auto-save it seems??? So we may consider changing the notification type.
 
 		Now since we introduced an interval by re-sending the dummy notification, this is still safe:
 			- again, this function callback is only relevant if the class is instantiated (i.e., chat window is open)
@@ -389,16 +386,21 @@ public class Chat extends Practice {
 		if StrLen(lastResponse) > 1 {
 			if Equals(lastResponseLine[0], "Assistant") {
 				this.m_text2.SetText(this.m_displayedChatName + ":\n" + lastResponse);
-			}else if Equals(lastResponseLine[0], "User") {
+			} else if Equals(lastResponseLine[0], "User") {
 				this.m_text2.SetText("You:\n" + lastResponse);
-			}else {
+			} else {
 				// Debug only! Normally we would hide system messages, they only provide primer or continuity information.
 				//this.m_text2.SetText("<" + lastResponse + ">");
 				this.m_text2.SetText("");
 			}
 		} else {
-			// Logically, if there is no last response, then there is no last request. Therefore, set the initial text value here:
-			this.m_text2.SetText("This is the beginning of your conversation with\n" + this.m_displayedChatName + " (" + this.m_displayedChatHandle + ")");
+			// Handle both cases in which no definite chat exists:
+			if Equals(this.m_displayedChatHandle, "(void)") {
+				this.m_text2.SetText("");
+			} else {
+				// If there is no last response, then there is no last request. Therefore, set the initial text value here:
+				this.m_text2.SetText("This is the beginning of your conversation with\n" + this.m_displayedChatName + " (" + this.m_displayedChatHandle + ")");
+			}
 		}
 		if StrLen(lastRequest) > 1 {
 			if Equals(lastRequestLine[0], "Assistant") {
@@ -415,8 +417,11 @@ public class Chat extends Practice {
 		}
 
 		// Update other UI elements:
-		this.m_nameDisplay.SetText(this.m_displayedChatName + "\n" + "(" + this.m_displayedChatHandle + ")");
-		this.m_logo.SetTexturePart(this.m_displayedChatLogo);
+		if NotEquals(this.m_displayedChatHandle, "(void)") {
+			this.m_nameDisplay.SetText(this.m_displayedChatName + "\n" + "(" + this.m_displayedChatHandle + ")");
+			this.m_logo.SetTexturePart(this.m_displayedChatLogo);
+			this.m_logo.SetSize(new Vector2(450.0 / 1.5, 450.0 / 1.5)); // Division for smaller images-
+		}
 	}
 
 	protected cb func OnClick(widget: wref<inkWidget>) -> Bool {
