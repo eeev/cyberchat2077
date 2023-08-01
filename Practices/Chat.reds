@@ -80,21 +80,6 @@ public class Chat extends Practice {
 
 		// Existing chats are created as TweakDB entries by cyberchat2077-ext upon loading into a save game
 		// They exist session-based, like chats themselves
-		/*
-		for record in TweakDBInterface.GetRecords(n"Website_Record") {
-			let currentUrl = ToString((record as Website_Record).Url());
-        	
-			LogChannel(n"DEBUG", "[CyberChat] Found chat_id: " + currentUrl);
-			// Since CyberChat indices are handles, we can simply scan for those URLs starting with '@'
-			// Should be safe since the game probably will not use this workaround itself.
-			/*
-			if StrBeginsWith(currentUrl, "@") {
-				LogChannel(n"DEBUG", "[CyberChat] Found chat with id: " + currentUrl);
-			}
-			*/
-				
-    	}
-		*/
 		let profileListTDB = TweakDBInterface.GetFlat(t"CyberChat.ALL_PROFILES");
 		let profileList = StrSplit(ToString(profileListTDB), ";", false);
 		let hashMap = new inkHashMap();
@@ -167,20 +152,6 @@ public class Chat extends Practice {
 		_______________________________
 
 		*/
-		let topFirst = new inkVerticalPanel();
-		topFirst.SetName(n"topFirst");
-		topFirst.SetFitToContent(true);
-		topFirst.SetAnchor(inkEAnchor.TopCenter);
-		topFirst.SetAnchorPoint(new Vector2(0.5, 0.0));
-		topFirst.SetChildMargin(new inkMargin(0.0, 30.0, 0.0, 30.0)); //8.0, 0.0 8.0, 48.0
-		topFirst.Reparent(root);
-
-		let colsss = new inkHorizontalPanel();
-		colsss.SetFitToContent(true);
-		colsss.SetHAlign(inkEHorizontalAlign.Center);
-		colsss.SetChildMargin(new inkMargin(10.0, 0.0, 10.0, 0.0));
-		colsss.Reparent(topFirst);
-
 		let bottom = new inkVerticalPanel();
 		bottom.SetName(n"bottom");
 		bottom.SetFitToContent(true);
@@ -196,6 +167,12 @@ public class Chat extends Practice {
 		top.SetAnchorPoint(new Vector2(0.5, 0.0));
 		top.SetChildMargin(new inkMargin(0.0, 30.0, 0.0, 30.0)); //8.0, 0.0 8.0, 48.0
 		top.Reparent(root);
+
+		let colsss = new inkHorizontalPanel();
+		colsss.SetFitToContent(true);
+		colsss.SetHAlign(inkEHorizontalAlign.Center);
+		colsss.SetChildMargin(new inkMargin(10.0, 0.0, 10.0, 0.0));
+		colsss.Reparent(top);
 
 		let center = new inkVerticalPanel();
 		center.SetName(n"center");
