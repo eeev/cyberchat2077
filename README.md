@@ -1,6 +1,6 @@
 # cyberchat2077
 
-*Cyberchat allows you to chat with in-game story-relevant NPCs in the game Cyberpunk2077. It uses OpenAI's ChatGPT advanced language model to generate responses.*
+*Cyberchat allows you to chat with in-game story-relevant NPCs in the game Cyberpunk2077. It uses OpenAI's advanced language models to generate responses.*
 
 ![Screenshot](CyberChat.PNG)
 
