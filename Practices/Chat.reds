@@ -177,10 +177,38 @@ public class Chat extends Practice {
 		let center = new inkVerticalPanel();
 		center.SetName(n"center");
 		center.SetFitToContent(true);
-		center.SetAnchor(inkEAnchor.Centered);
+		center.SetAnchor(inkEAnchor.BottomCenter);
 		center.SetAnchorPoint(new Vector2(0.5, 0.5));
 		center.SetChildMargin(new inkMargin(0.0, 30.0, 0.0, 30.0)); //8.0, 0.0 8.0, 48.0
-		center.Reparent(root);
+		center.Reparent(bottom);
+
+		// At most ~800 characters:
+        //text.SetText("Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.");
+		// Note that this number only applies to a single response text field, if we trick the system we can get two in a row
+		// which adds up to more than 800, hence the text will glitch outside its boundaries.. might fix in the future..
+
+		let text = new inkText();
+		text.SetWrapping(true, 1000.0); //700.0
+        text.SetFitToContent(true);
+		text.SetContentHAlign(inkEHorizontalAlign.Right);
+        text.SetFontFamily("base\\gameplay\\gui\\fonts\\raj\\raj.inkfontfamily");
+        text.SetStyle(r"base\\gameplay\\gui\\common\\main_colors.inkstyle");
+        text.BindProperty(n"tintColor", n"MainColors.Red");
+        text.BindProperty(n"fontWeight", n"MainColors.BodyFontWeight");
+        text.BindProperty(n"fontSize", n"MainColors.ReadableSmall");
+        text.Reparent(center);
+		this.m_text = text; // Refers to request
+
+		let text2 = new inkText();
+		text2.SetWrapping(true, 1000.0); //700.0
+        text2.SetFitToContent(true);
+        text2.SetFontFamily("base\\gameplay\\gui\\fonts\\raj\\raj.inkfontfamily");
+        text2.SetStyle(r"base\\gameplay\\gui\\common\\main_colors.inkstyle");
+        text2.BindProperty(n"tintColor", n"MainColors.Red");
+        text2.BindProperty(n"fontWeight", n"MainColors.BodyFontWeight");
+        text2.BindProperty(n"fontSize", n"MainColors.ReadableSmall");
+        text2.Reparent(center);
+		this.m_text2 = text2; // Refers to response
 
 		let cols = new inkHorizontalPanel();
 		cols.SetFitToContent(true);
@@ -240,34 +268,6 @@ public class Chat extends Practice {
         nameDisplay.Reparent(cols2);
 		nameDisplay.SetText("Welcome, V!"); // Hard-coded for the same reason as above: Some default value has to be set!
 		this.m_nameDisplay = nameDisplay;
-
-		// At most ~800 characters:
-        //text.SetText("Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.");
-		// Note that this number only applies to a single response text field, if we trick the system we can get two in a row
-		// which adds up to more than 800, hence the text will glitch outside its boundaries.. might fix in the future..
-
-		let text = new inkText();
-		text.SetWrapping(true, 1000.0); //700.0
-        text.SetFitToContent(true);
-		text.SetContentHAlign(inkEHorizontalAlign.Right);
-        text.SetFontFamily("base\\gameplay\\gui\\fonts\\raj\\raj.inkfontfamily");
-        text.SetStyle(r"base\\gameplay\\gui\\common\\main_colors.inkstyle");
-        text.BindProperty(n"tintColor", n"MainColors.Red");
-        text.BindProperty(n"fontWeight", n"MainColors.BodyFontWeight");
-        text.BindProperty(n"fontSize", n"MainColors.ReadableSmall");
-        text.Reparent(center);
-		this.m_text = text; // Refers to request
-
-		let text2 = new inkText();
-		text2.SetWrapping(true, 1000.0); //700.0
-        text2.SetFitToContent(true);
-        text2.SetFontFamily("base\\gameplay\\gui\\fonts\\raj\\raj.inkfontfamily");
-        text2.SetStyle(r"base\\gameplay\\gui\\common\\main_colors.inkstyle");
-        text2.BindProperty(n"tintColor", n"MainColors.Red");
-        text2.BindProperty(n"fontWeight", n"MainColors.BodyFontWeight");
-        text2.BindProperty(n"fontSize", n"MainColors.ReadableSmall");
-        text2.Reparent(center);
-		this.m_text2 = text2; // Refers to response
 
 		this.UpdateChat(); // Populates the chat window with CyberAI data
 
@@ -458,9 +458,9 @@ public class Chat extends Practice {
 
 						break;
 					default:
-						// 3) Set user input as 'sent' message and clear previous response.
-						this.m_text.SetText("You:\n" + userTextInput);
-						this.m_text2.SetText("");
+						// 3) Set user input as 'sent' message (on the bottom) and put the previously displayed message above it.
+						this.m_text.SetText(this.m_text2.GetText());
+						this.m_text2.SetText("You:\n" + userTextInput);
 						// 4) Check if a dialogue with this NPC already exists in CyberAIs local storage.
 						if StrLen(GetHistoryAsString(this.m_displayedChatHandle)) <= 1 {
 							// Case 1: The Dialogue does not exist yet, hence, include a primer to inform ChatGPT about its role.
