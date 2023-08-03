@@ -803,11 +803,11 @@ public class ConfirmationPopup extends InMenuPopup {
 		super.OnCreate();
 
 		let content = InMenuPopupContent.Create();
-		content.SetTitle("Inner Popup");
+		content.SetTitle("Under Development..");
 		content.Reparent(this);
 
 		let text = new inkText();
-        text.SetText("In user interface design for computer applications, a modal window is a graphical control element subordinate to an application's main window.");
+        text.SetText("This feature is not available yet :( developing this mod has been a full-time job from the start for me as a solo developer; Please stay patient as subsequent updates are planned but might take some days or weeks..");
         text.SetWrapping(true, 700.0);
         text.SetFitToContent(true);
         text.SetFontFamily("base\\gameplay\\gui\\fonts\\raj\\raj.inkfontfamily");
