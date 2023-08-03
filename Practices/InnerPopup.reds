@@ -36,6 +36,7 @@ public class InnerPopup extends Practice {
 	}
 }
 
+/*
 public class ConfirmationPopup extends InMenuPopup {
 	protected cb func OnCreate() {
 		super.OnCreate();
@@ -75,3 +76,4 @@ public class ConfirmationPopup extends InMenuPopup {
 		return popup;
 	}
 }
+*/

@@ -64,11 +64,23 @@ public class Chat extends Practice {
 
 	// Currently displayed chat metadata 
 	// (should be updated from profile every chat tab button click and in OnCreate())
+	private let m_displayedChatProfile: String;
 	private let m_displayedChatHandle: String;
 	private let m_displayedChatName: String;
 	private let m_displayedChatLogo: CName;
 	private let m_displayedChatPrimer1: String;
 	private let m_displayedChatPrimer2: String;
+
+	// Previously diplayed chat
+	// (it might look a bit weird to store a button reference here, but this is only used for activating it)
+	private let m_previousChat: ref<CustomButton>;
+
+	private let m_chatProfiles: array<String>;
+	private let m_displayChatProfiles: array<String>;
+	private let m_index: Int32;
+	private let m_step: Int32;
+	private let m_navButtonLeft: ref<CustomButton>;
+	private let m_navButtonRight: ref<CustomButton>;
 
 	protected cb func OnCreate() {
 		/*
@@ -103,7 +115,11 @@ public class Chat extends Practice {
 			//let retrievedProfileTest: ref<Profile> = hashMap.Get(TDBID.ToNumber(handleTDBID)) as Profile;
 			//LogChannel(n"DEBUG", "[CyberChat] Check profile; handle: " + retrievedProfileTest.m_handle + " name: " + retrievedProfileTest.m_name);
 		}
+		// Add a last entry to the profiles which is not stored in the hashmap: An 'add new chat'-button.
+		ArrayPush(profileList, "+");
+
 		this.m_hashMap = hashMap;
+		this.m_chatProfiles = profileList;
 
 		// There needs to be a default chat to show initially.
 		this.m_displayedChatHandle = "(void)";
@@ -121,25 +137,28 @@ public class Chat extends Practice {
 
 		(root)_________________________
 		
-						---------------------
-						| colsss
-						|
-						|	... <@panam> <@judy> <@xyz> ...
-						|
+	
 						---------------------
 						| top
+						|	
+						|	---------------------
+						|	| colsss
+						|	|
+						|	|	... <@panam> <@judy> ...
+						|	|
+						|	---------------------
 						|
 						|	<logo> <name, handle>
 						|	
 						---------------------
-						| center
-						|
-						|			<request>
-						|	<response>
-						|
-						---------------------
 						| bottom
 						|
+						|	---------------------
+						|	| center
+						|	|
+						|	|			<request>
+						|	|	<response>
+						|	|
 						|	---------------------
 						|	| cols
 						|	|
@@ -174,6 +193,11 @@ public class Chat extends Practice {
 		colsss.SetChildMargin(new inkMargin(10.0, 0.0, 10.0, 0.0));
 		colsss.Reparent(top);
 
+		/*
+
+			Chat messages
+
+		*/
 		let center = new inkVerticalPanel();
 		center.SetName(n"center");
 		center.SetFitToContent(true);
@@ -222,16 +246,71 @@ public class Chat extends Practice {
 		cols2.SetChildMargin(new inkMargin(20.0, 0.0, 20.0, 0.0));
 		cols2.Reparent(top);
 
-			// For each chat handle, create an individual tab button:
-			for profile in profileList {
+		/*
+
+			Button navigation
+
+		*/
+		let navButtonLeft = SimpleButton.Create();
+		navButtonLeft.SetName(n"navLeft");
+		navButtonLeft.SetText("<");
+		navButtonLeft.SetWidth(100);
+		navButtonLeft.ToggleAnimations(true);
+		navButtonLeft.ToggleSounds(true);
+		navButtonLeft.Reparent(colsss);
+		navButtonLeft.SetDisabled(true);
+		this.m_navButtonLeft = navButtonLeft;
+
+		// Clear the display subset of profileList if it was used before
+		if ArraySize(this.m_displayChatProfiles) > 0 {
+			ArrayClear(this.m_displayChatProfiles);
+		}
+
+		// This is the first index from which we start selecting the next m-1 elements to be displayed
+		this.m_index = 0;
+		this.m_step = 2;
+		let i = 0;
+		// For the first m chat handles, create an individual tab button:
+		for profile in profileList {
+			// Select the first m_step profiles to be tabs
+			if i < this.m_step {
 				let chatTabButton = SimpleButton.Create();
 				chatTabButton.SetName(StringToName(profile));
 				chatTabButton.SetText(profile); // This is important: It is used to index the hash map below!
 				chatTabButton.ToggleAnimations(true);
 				chatTabButton.ToggleSounds(true);
 				chatTabButton.Reparent(colsss);
-			}
 
+				// The given profile is now one of the m tabbed profiles
+				ArrayPush(this.m_displayChatProfiles, profile);
+				i += 1;
+			}
+		}
+
+		LogChannel(n"DEBUG", "[CyberChat] profileList:");
+		this.print1DArray(profileList);
+		LogChannel(n"DEBUG", "[CyberChat] displayedList:");
+		this.print1DArray(this.m_displayChatProfiles);
+
+		let navButtonRight = SimpleButton.Create();
+		navButtonRight.SetName(n"navRight");
+		navButtonRight.SetText(">");
+		navButtonRight.SetWidth(100);
+		navButtonRight.ToggleAnimations(true);
+		navButtonRight.ToggleSounds(true);
+		navButtonRight.Reparent(colsss);
+		// Note that the right navigation button only needs to be enabled when there are enough chats for pagination:
+		if ArraySize(profileList) <= this.m_step {
+			navButtonRight.SetDisabled(true);
+		}
+		this.m_navButtonRight = navButtonRight;
+		
+
+		/*
+
+			Text input
+
+		*/
 		let input = HubTextInput.Create();
 		input.SetText("");
 		input.Reparent(cols);
@@ -245,6 +324,11 @@ public class Chat extends Practice {
 		sendButton.ToggleSounds(true);
 		sendButton.Reparent(cols);
 
+		/*
+
+			Profile display
+
+		*/
 		let logo = new inkImage();
 		logo.SetName(n"logo");
 		logo.SetAtlasResource(chatPartnerIconPath());
@@ -254,6 +338,7 @@ public class Chat extends Practice {
 		logo.SetSize(new Vector2(0.1, 0.1)); // Division for smaller images-
 		logo.SetInteractive(true);
 		logo.Reparent(cols2);
+		logo.SetEffectEnabled(inkEffectType.Glitch, n"Glitch", true);
 		this.m_logo = logo;
 
 		let nameDisplay = new inkText();
@@ -304,6 +389,38 @@ public class Chat extends Practice {
 				button.RegisterToCallback(n"OnUINotification", this, n"OnUINotification");
 			}
 
+			childIndex += 1;
+		}
+	}
+
+	// Helper function to apply a list of labels to buttons within a container widget
+	private func setLabels(container: wref<inkCompoundWidget>, labels: array<String>) {
+		let childIndex: Int32 = 1;
+		let numChildren: Int32 = container.GetNumChildren() - 1;
+		let labelIndex: Int32 = 0;
+
+		while childIndex < numChildren {
+			let widget = container.GetWidgetByIndex(childIndex);
+			let button = widget.GetController() as CustomButton;
+
+			if IsDefined(button) {
+				if StrLen(labels[labelIndex]) > 0 {
+					button.SetText(labels[labelIndex]);
+					if Equals(labels[labelIndex], this.m_displayedChatProfile) {
+						button.SetDisabled(true);
+					} else {
+						button.SetDisabled(false);
+					}
+				} else {
+					// This becomes relevant when the labels array is smaller than the number of button to label
+					// aka the number of chat profiles is odd
+					button.SetDisabled(true);
+					button.SetText("");
+				}
+				
+			}
+
+			labelIndex += 1;
 			childIndex += 1;
 		}
 	}
@@ -424,6 +541,45 @@ public class Chat extends Practice {
 		}
 	}
 
+	// Helper function to return array subsets of a string array in a given range
+	private func arraySubset(input: array<String>, start: Int32, end: Int32) -> array<String> {
+		LogChannel(n"DEBUG", "[CyberChat] [Helper] arraySubset called: start=" + start + ",end=" + end);
+		if ArraySize(input) == 0 {
+			return [""];
+		} else {
+			if start > end {
+				return [""];
+			} else {
+				if start < 0 || end > ArraySize(input) {
+					return [""];
+				} else {
+					if start == end {
+						return [input[start]];
+					} else {
+						let res: array<String>;
+						let k = start;
+
+						while k <= end {
+							ArrayPush(res, input[k]);
+							k += 1;
+						}
+						
+						return res;
+					}
+				}
+			}
+		}
+	}
+
+	private func print1DArray(input: array<String>) {
+		let p = 0;
+
+		while p < ArraySize(input) {
+			LogChannel(n"DEBUG", "[CyberChat] [Helper] array [" + p + "] -> " + input[p]);
+			p += 1;
+		}
+	}
+
 	protected cb func OnClick(widget: wref<inkWidget>) -> Bool {
 		let button = widget.GetController() as CustomButton;
 
@@ -511,17 +667,70 @@ public class Chat extends Practice {
 						break;
 				}	
 			}
+		} else if Equals(buttonName, "<") {
+			// Update the currently displayed subarray of profileList
+			// In essence, get the next subset of chat profiles starting at the latest shown index - the number of tabs shown (step)
+			if (this.m_index > this.m_step - 1) {
+				this.m_index -= this.m_step;
+
+				this.m_displayChatProfiles = this.arraySubset(this.m_chatProfiles, this.m_index, this.m_index + this.m_step - 1);
+				this.setLabels(this.m_verts, this.m_displayChatProfiles);
+				LogChannel(n"DEBUG", "[CyberChat] displayedList:");
+				this.print1DArray(this.m_displayChatProfiles);
+
+				// If we moved to the left and this moved our lower index bound (m_index) to zero, disable the left button
+				if (this.m_index == 0) {
+					this.m_navButtonLeft.SetDisabled(true);
+				}
+				
+				// If we moved to the left at least one time, the right button becomes enabled:
+				this.m_navButtonRight.SetDisabled(false);
+			}
+		} else if Equals(buttonName, ">") {
+			// Update the currently displayed subarray of profileList
+			// In essence, get the next subset of chat profiles starting at the latest shown index + the number of tabs shown (step)
+			if (this.m_index < ArraySize(this.m_chatProfiles) - this.m_step) {
+				// Increment index
+				this.m_index += this.m_step;
+
+				this.m_displayChatProfiles = this.arraySubset(this.m_chatProfiles, this.m_index, this.m_index + this.m_step - 1);
+				this.setLabels(this.m_verts, this.m_displayChatProfiles);
+				LogChannel(n"DEBUG", "[CyberChat] displayedList:");
+				this.print1DArray(this.m_displayChatProfiles);
+
+				// If we moved to the right, check if we hit the outer bound:
+				if (this.m_index + this.m_step > ArraySize(this.m_chatProfiles)) {
+					this.m_navButtonRight.SetDisabled(true);
+				}
+
+				// If we moved to the right at least one time, the left button becomes enabled:
+				this.m_navButtonLeft.SetDisabled(false);
+			}
+		} else if Equals(buttonName, "+") {
+			// New chat popup here..
+			this.OnOpenPopup(this.m_verts);
 		} else {
-			// If this button is not the send button, then the button name is the chat handle to load:
+			// If this button is not the send or any pagination button, then the button name is the chat handle to load:
 			let indexTDBID = TDBID.Create(buttonName);
 			let retrievedProfileTest: ref<Profile> = this.m_hashMap.Get(TDBID.ToNumber(indexTDBID)) as Profile;
 
+			this.m_displayedChatProfile = buttonName;
 			this.m_displayedChatHandle = retrievedProfileTest.m_handle;
 			this.m_displayedChatName = retrievedProfileTest.m_name;
 			this.m_displayedChatLogo = retrievedProfileTest.m_logo;
 			this.m_displayedChatPrimer1 = retrievedProfileTest.m_primer1;
 			this.m_displayedChatPrimer2 = retrievedProfileTest.m_primer2;
 			this.UpdateChat();
+
+			// First, enable any previously disabled chat selection button:
+			if IsDefined(this.m_previousChat) {
+				this.m_previousChat.SetDisabled(false);
+			}
+			// Then, disable the current button:
+			button.SetDisabled(true);
+			// Finally, set the previously disabled chat selection button to the current button:
+			this.m_previousChat = button;
+
 		}
 	}
 
@@ -573,5 +782,58 @@ public class Chat extends Practice {
 	protected func RemoveHints() {
 		this.RemoveHint(n"popup_moveUp");
 		this.RemoveHint(n"click");
+	}
+
+	protected cb func OnOpenPopup(widget: wref<inkWidget>) {
+		let popup = ConfirmationPopup.Show(this.GetGameController());
+		popup.RegisterToCallback(n"OnClose", this, n"OnClosePopup");
+
+		this.Log("Open");
+	}
+
+	protected cb func OnClosePopup(widget: wref<inkWidget>) {
+	    let popup = widget.GetController() as ConfirmationPopup;
+
+	    this.Log(s"Closed: \(popup.GetResult())");
+	}
+}
+
+public class ConfirmationPopup extends InMenuPopup {
+	protected cb func OnCreate() {
+		super.OnCreate();
+
+		let content = InMenuPopupContent.Create();
+		content.SetTitle("Inner Popup");
+		content.Reparent(this);
+
+		let text = new inkText();
+        text.SetText("In user interface design for computer applications, a modal window is a graphical control element subordinate to an application's main window.");
+        text.SetWrapping(true, 700.0);
+        text.SetFitToContent(true);
+        text.SetFontFamily("base\\gameplay\\gui\\fonts\\raj\\raj.inkfontfamily");
+        text.SetStyle(r"base\\gameplay\\gui\\common\\main_colors.inkstyle");
+        text.BindProperty(n"tintColor", n"MainColors.Red");
+        text.BindProperty(n"fontWeight", n"MainColors.BodyFontWeight");
+        text.BindProperty(n"fontSize", n"MainColors.ReadableSmall");
+        text.Reparent(content.GetContainerWidget());
+
+		let footer = InMenuPopupFooter.Create();
+		footer.Reparent(this);
+
+		let confirmBtn = PopupButton.Create();
+		confirmBtn.SetText(GetLocalizedText("LocKey#23123"));
+		confirmBtn.SetInputAction(n"system_notification_confirm");
+		confirmBtn.Reparent(footer);
+
+		let cancelBtn = PopupButton.Create();
+		cancelBtn.SetText(GetLocalizedText("LocKey#22175"));
+		cancelBtn.SetInputAction(n"back");
+		cancelBtn.Reparent(footer);
+	}
+
+	public static func Show(requester: ref<inkGameController>) -> ref<ConfirmationPopup> {
+		let popup = new ConfirmationPopup();
+		popup.Open(requester);
+		return popup;
 	}
 }
