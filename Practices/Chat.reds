@@ -287,11 +287,6 @@ public class Chat extends Practice {
 			}
 		}
 
-		LogChannel(n"DEBUG", "[CyberChat] profileList:");
-		this.print1DArray(profileList);
-		LogChannel(n"DEBUG", "[CyberChat] displayedList:");
-		this.print1DArray(this.m_displayChatProfiles);
-
 		let navButtonRight = SimpleButton.Create();
 		navButtonRight.SetName(n"navRight");
 		navButtonRight.SetText(">");
@@ -543,7 +538,7 @@ public class Chat extends Practice {
 
 	// Helper function to return array subsets of a string array in a given range
 	private func arraySubset(input: array<String>, start: Int32, end: Int32) -> array<String> {
-		LogChannel(n"DEBUG", "[CyberChat] [Helper] arraySubset called: start=" + start + ",end=" + end);
+		//LogChannel(n"DEBUG", "[CyberChat] [Helper] arraySubset called: start=" + start + ",end=" + end);
 		if ArraySize(input) == 0 {
 			return [""];
 		} else {
@@ -575,7 +570,7 @@ public class Chat extends Practice {
 		let p = 0;
 
 		while p < ArraySize(input) {
-			LogChannel(n"DEBUG", "[CyberChat] [Helper] array [" + p + "] -> " + input[p]);
+			//LogChannel(n"DEBUG", "[CyberChat] [Helper] array [" + p + "] -> " + input[p]);
 			p += 1;
 		}
 	}
@@ -675,8 +670,6 @@ public class Chat extends Practice {
 
 				this.m_displayChatProfiles = this.arraySubset(this.m_chatProfiles, this.m_index, this.m_index + this.m_step - 1);
 				this.setLabels(this.m_verts, this.m_displayChatProfiles);
-				LogChannel(n"DEBUG", "[CyberChat] displayedList:");
-				this.print1DArray(this.m_displayChatProfiles);
 
 				// If we moved to the left and this moved our lower index bound (m_index) to zero, disable the left button
 				if (this.m_index == 0) {
@@ -695,8 +688,6 @@ public class Chat extends Practice {
 
 				this.m_displayChatProfiles = this.arraySubset(this.m_chatProfiles, this.m_index, this.m_index + this.m_step - 1);
 				this.setLabels(this.m_verts, this.m_displayChatProfiles);
-				LogChannel(n"DEBUG", "[CyberChat] displayedList:");
-				this.print1DArray(this.m_displayChatProfiles);
 
 				// If we moved to the right, check if we hit the outer bound:
 				if (this.m_index + this.m_step > ArraySize(this.m_chatProfiles)) {
