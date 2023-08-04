@@ -101,17 +101,33 @@ public class Chat extends Practice {
 			let handleTDBID = TDBID.Create("CyberChat." + profile + "_handle");
 			let nameTDBID = TDBID.Create("CyberChat." + profile + "_name");
 			let logoTDBID = TDBID.Create("CyberChat." + profile + "_logo");
+			let conditionTDBID = TDBID.Create("CyberChat." + profile + "_condition");
 			let primer1TDBID = TDBID.Create("CyberChat." + profile + "_primer1");
 			let primer2TDBID = TDBID.Create("CyberChat." + profile + "_primer2");
 
 			let handle = TweakDBInterface.GetFlat(handleTDBID);
 			let name = TweakDBInterface.GetFlat(nameTDBID);
 			let logo = TweakDBInterface.GetFlat(logoTDBID);
+			let condition = TweakDBInterface.GetFlat(conditionTDBID);
 			let primer1 = TweakDBInterface.GetFlat(primer1TDBID);
 			let primer2 = TweakDBInterface.GetFlat(primer2TDBID);
 
-			let indexTDBID = TDBID.Create(profile);
-			hashMap.Insert(TDBID.ToNumber(indexTDBID), Profile.Create(ToString(handle), ToString(name), StringToName(ToString(logo)), ToString(primer1), ToString(primer2)));
+			// New: Only add profile if the condition is met.
+			if StrLen(ToString(condition)) == 0 {
+				// First case: There is no condition / the condition is left blank
+				let indexTDBID = TDBID.Create(profile);
+				hashMap.Insert(TDBID.ToNumber(indexTDBID), Profile.Create(ToString(handle), ToString(name), StringToName(ToString(logo)), ToString(primer1), ToString(primer2)));
+			} else {
+				// Second case: Check the condition, typically fact has to be = 1 or some value larger than 0:
+				if (GameInstance.GetQuestsSystem(this.GetGame()).GetFactStr(ToString(condition)) > 0) {
+					let indexTDBID = TDBID.Create(profile);
+					hashMap.Insert(TDBID.ToNumber(indexTDBID), Profile.Create(ToString(handle), ToString(name), StringToName(ToString(logo)), ToString(primer1), ToString(primer2)));
+				} else {
+					// The condition is defined, but not met; Remove profile from profileList so the button is not generated.
+					ArrayRemove(profileList, profile);
+				}
+			}
+				
 			//let retrievedProfileTest: ref<Profile> = hashMap.Get(TDBID.ToNumber(handleTDBID)) as Profile;
 			//LogChannel(n"DEBUG", "[CyberChat] Check profile; handle: " + retrievedProfileTest.m_handle + " name: " + retrievedProfileTest.m_name);
 		}
@@ -461,7 +477,7 @@ public class Chat extends Practice {
 				- these can both be sent by either the user directly, or responses received from OpenAI
 
 		*/
-		LogChannel(n"DEBUG", "[CyberChat] Updating chat for " + this.m_displayedChatHandle);
+		//LogChannel(n"DEBUG", "[CyberChat] Updating chat for " + this.m_displayedChatHandle);
 
 		let lastResponseLine = [""];
 		let lastRequestLine = [""];
@@ -579,7 +595,7 @@ public class Chat extends Practice {
 		let button = widget.GetController() as CustomButton;
 
 		let buttonName = button.GetText();
-		LogChannel(n"DEBUG", "[CyberChat] Button pressed: " + buttonName);
+		//LogChannel(n"DEBUG", "[CyberChat] Button pressed: " + buttonName);
 		let buttonEvent = this.GetLocalizedText("CyberChat-ButtonBasics-Event-Click");
 
 		this.Log(buttonName + ": " + buttonEvent);
@@ -725,6 +741,7 @@ public class Chat extends Practice {
 		}
 	}
 
+	/*
 	protected cb func OnRelease(evt: ref<inkPointerEvent>) -> Bool {
 		let button = evt.GetTarget().GetController() as CustomButton;
 
@@ -742,6 +759,7 @@ public class Chat extends Practice {
 			this.PlaySound(n"MapPin", n"OnCreate");
 		}
 	}
+	*/
 
 	protected cb func OnEnter(evt: ref<inkPointerEvent>) -> Bool {
 		let button = evt.GetTarget().GetController() as CustomButton;
@@ -754,6 +772,7 @@ public class Chat extends Practice {
 	}
 
 	protected func UpdateHints(button: ref<CustomButton>) {
+		/*
 		this.UpdateHint(
 			n"popup_moveUp",
 			this.GetLocalizedText(
@@ -762,6 +781,7 @@ public class Chat extends Practice {
 					: "CyberChat-ButtonBasics-Action-Enable"
 			)
 		);
+		*/
 
 		this.UpdateHint(
 			n"click",
@@ -798,7 +818,7 @@ public class ConfirmationPopup extends InMenuPopup {
 		content.Reparent(this);
 
 		let text = new inkText();
-        text.SetText("This feature is not available yet :( developing this mod has been a full-time job from the start for me as a solo developer; Please stay patient as subsequent updates are planned but might take some days or weeks..");
+        text.SetText("This feature is sadly not available yet. Developing this mod has been a full-time job from the start for me as a solo developer; Please stay patient as subsequent updates are planned but might take some days or weeks..");
         text.SetWrapping(true, 700.0);
         text.SetFitToContent(true);
         text.SetFontFamily("base\\gameplay\\gui\\fonts\\raj\\raj.inkfontfamily");
