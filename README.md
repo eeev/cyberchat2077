@@ -21,10 +21,34 @@
 `%CyberpunkDir%\r6\scripts\`
     - Alternatively, add the whole `.zip` file in [Vortex](https://www.nexusmods.com/about/vortex/?)
 
-## Usage
+### Usage
 
 - While not in a vehicle, press and hold `R` (car radio button) to open the chat window
 - You can now chat with story-relevant NPCs. Switch your conversation partner with the buttons at the top
+
+### Feature Roadmap
+- [ ] In-game conversation fact tracker
+    - [x] Access only unlocked chat partner profiles
+    - [x] Display notification when unlocking new profiles
+    - [ ] (WIP) Limit or extend chat partner knowledge based on game progress
+
+<details>
+
+<summary>Fact to knowledge mapping progress !! MAJOR SPOILERS !!</summary>
+
+| Profile| Fact  | Knowledge | Done |
+| ------------- | ------------- | ------------- | ------------- | ------------- |
+| Judy | `q004_judy_met`  | (Condition) | ✓ |
+| Judy | `judy_knows_johnny` | Told Judy about the chip (Johnny) | |
+| Judy | `judy_left_nc` | Judy left Night City (?) | |
+| Evelyn | `q004_evelyn_char_entry` | (Condition) | |
+| Evelyn | `q105_evelyn_found` | Recovered Evelyn barely alive | |
+| Panam | `q103_panam_met` | (Condition) | ✓ |
+| Johnny | `q101_johnny_char_entry` | (Condition) | ✓ |
+| Rogue | `q103_rogue_met` | (Condition) | ✓ |
+| Rogue | `sq031_rogue_met_johnny` | Told Rogue about the chip (Johnny) | |
+
+</details>
 
 ### Configuration
 
@@ -32,14 +56,14 @@ You can edit certain variables in `.\Config\CyberChatConfig.reds` that affect th
 
 | Variable  | Description | Example |
 | ------------- | ------------- | ------------- |
-| `updateInterval`  | While Cyberchat is open and after the user sent a message: The interval (in seconds) in which to check for responses | 2.0 |
-| `chatPartnerIconPath`  | A resource identifier for the icon to be displayed for this chat partner | r"base\\gameplay\\gui\\common\\icons\\avatars\\avatars1.inkatlas" |
+| `updateInterval`  | After the user sent a message: The interval (in seconds) in which to check for responses | 2.0 |
+| `chatPartnerIconPath`  | A resource identifier for the icon atlas to be loaded for chat profiles | r"base\\gameplay\\gui\\common\\icons\\avatars\\avatars1.inkatlas" |
 
 ### Commands
 
-You can execute relevant commands by sending them as chat messages:
+You can execute relevant commands by sending them as chat messages. Where applicable, they will refer to the current chat profile:
 
 | Command  | Description |
 | ------------- | ------------- |
-| `/flush`  | Calls CyberAI's `FlushChat("id")` function to 'delete' chat history |
-| `/update`  | Updates displayed chat messages with chat information from CyberAI  |
+| `/flush`  | Calls CyberAI's `FlushChat("id")` function to 'delete' chat history for this profile |
+| `/update`  | Updates displayed chat messages for this profile with chat information from CyberAI  |
