@@ -81,6 +81,7 @@ public class Chat extends Practice {
 	private let m_step: Int32;
 	private let m_navButtonLeft: ref<CustomButton>;
 	private let m_navButtonRight: ref<CustomButton>;
+	private let m_sendButton: ref<CustomButton>;
 
 	protected cb func OnCreate() {
 		/*
@@ -334,6 +335,8 @@ public class Chat extends Practice {
 		sendButton.ToggleAnimations(true);
 		sendButton.ToggleSounds(true);
 		sendButton.Reparent(cols);
+		sendButton.SetDisabled(true);
+		this.m_sendButton = sendButton;
 
 		/*
 
@@ -349,7 +352,7 @@ public class Chat extends Practice {
 		logo.SetSize(new Vector2(0.1, 0.1)); // Division for smaller images-
 		logo.SetInteractive(true);
 		logo.Reparent(cols2);
-		logo.SetEffectEnabled(inkEffectType.Glitch, n"Glitch", true);
+		//logo.SetEffectEnabled(inkEffectType.Glitch, n"Glitch", true);
 		this.m_logo = logo;
 
 		let nameDisplay = new inkText();
@@ -728,6 +731,9 @@ public class Chat extends Practice {
 			this.m_displayedChatPrimer1 = retrievedProfileTest.m_primer1;
 			this.m_displayedChatPrimer2 = retrievedProfileTest.m_primer2;
 			this.UpdateChat();
+
+			// Now enable the send button to actually chat:
+			this.m_sendButton.SetDisabled(false);
 
 			// First, enable any previously disabled chat selection button:
 			if IsDefined(this.m_previousChat) {
