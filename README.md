@@ -35,7 +35,7 @@
     - [ ] (WIP) Limit or extend chat partner knowledge based on game progress
 
 | Profile| Fact  | Knowledge | Done |
-| ------------- | ------------- | ------------- | ------------- | ------------- |
+| ------------- | ------------- | ------------- | ------------- |
 | Judy | `q004_judy_met`  | (Condition) | ✓ |
 | Judy | `judy_knows_johnny` | Told Judy about the chip (Johnny) | |
 | Judy | `judy_left_nc` | Judy left Night City (?) | |
