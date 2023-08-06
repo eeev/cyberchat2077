@@ -6,6 +6,8 @@
 
 ## Video
 
+[YouTube demonstration](https://youtu.be/1t8nTcdxFL4)
+
 ## Installation
 
 1) Download the latest release and necessary requirements:
