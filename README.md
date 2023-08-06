@@ -32,10 +32,6 @@
     - [x] Display notification when unlocking new profiles
     - [ ] (WIP) Limit or extend chat partner knowledge based on game progress
 
-<details>
-
-<summary>Fact to knowledge mapping progress !! MAJOR SPOILERS !!</summary>
-
 | Profile| Fact  | Knowledge | Done |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
 | Judy | `q004_judy_met`  | (Condition) | ✓ |
@@ -47,8 +43,6 @@
 | Johnny | `q101_johnny_char_entry` | (Condition) | ✓ |
 | Rogue | `q103_rogue_met` | (Condition) | ✓ |
 | Rogue | `sq031_rogue_met_johnny` | Told Rogue about the chip (Johnny) | |
-
-</details>
 
 ### Configuration
 
