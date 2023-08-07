@@ -25,14 +25,16 @@ protected cb func OnUINotification(evt: ref<UIInGameNotificationEvent>) -> Bool 
 public class Profile {
 	public let m_handle: String;
 	public let m_name: String;
+	public let m_logoPath: ResRef;
 	public let m_logo: CName;
 	public let m_primer1: String;
 	public let m_primer2: String;
 
-	public static func Create(handle: String, name: String, logo: CName, primer1: String, primer2: String) -> ref<Profile> {
+	public static func Create(handle: String, name: String, logoPath: ResRef, logo: CName, primer1: String, primer2: String) -> ref<Profile> {
 		let self = new Profile();
 		self.m_handle = handle;
 		self.m_name = name;
+		self.m_logoPath = logoPath;
 		self.m_logo = logo;
 		self.m_primer1 = primer1;
 		self.m_primer2 = primer2;
@@ -67,6 +69,7 @@ public class Chat extends Practice {
 	private let m_displayedChatProfile: String;
 	private let m_displayedChatHandle: String;
 	private let m_displayedChatName: String;
+	private let m_displayedChatLogoPath: ResRef;
 	private let m_displayedChatLogo: CName;
 	private let m_displayedChatPrimer1: String;
 	private let m_displayedChatPrimer2: String;
@@ -101,6 +104,7 @@ public class Chat extends Practice {
 			LogChannel(n"DEBUG", "[CyberChat] Found profile: '" + profile + "'");
 			let handleTDBID = TDBID.Create("CyberChat." + profile + "_handle");
 			let nameTDBID = TDBID.Create("CyberChat." + profile + "_name");
+			let logoPathTDBID = TDBID.Create("CyberChat." + profile + "_logoPath");
 			let logoTDBID = TDBID.Create("CyberChat." + profile + "_logo");
 			let conditionTDBID = TDBID.Create("CyberChat." + profile + "_condition");
 			let primer1TDBID = TDBID.Create("CyberChat." + profile + "_primer1");
@@ -108,6 +112,7 @@ public class Chat extends Practice {
 
 			let handle = TweakDBInterface.GetFlat(handleTDBID);
 			let name = TweakDBInterface.GetFlat(nameTDBID);
+			let logoPath = TweakDBInterface.GetFlat(logoPathTDBID);
 			let logo = TweakDBInterface.GetFlat(logoTDBID);
 			let condition = TweakDBInterface.GetFlat(conditionTDBID);
 			let primer1 = TweakDBInterface.GetFlat(primer1TDBID);
@@ -117,12 +122,13 @@ public class Chat extends Practice {
 			if StrLen(ToString(condition)) == 0 {
 				// First case: There is no condition / the condition is left blank
 				let indexTDBID = TDBID.Create(profile);
-				hashMap.Insert(TDBID.ToNumber(indexTDBID), Profile.Create(ToString(handle), ToString(name), StringToName(ToString(logo)), ToString(primer1), ToString(primer2)));
+				//LogChannel(n"DEBUG", "[CyberChat] Empty chat for " + profile);
+				hashMap.Insert(TDBID.ToNumber(indexTDBID), Profile.Create(ToString(handle), ToString(name), ResRef.FromString(ToString(logoPath)), StringToName(ToString(logo)), ToString(primer1), ToString(primer2)));
 			} else {
 				// Second case: Check the condition, typically fact has to be = 1 or some value larger than 0:
 				if (GameInstance.GetQuestsSystem(this.GetGame()).GetFactStr(ToString(condition)) > 0) {
 					let indexTDBID = TDBID.Create(profile);
-					hashMap.Insert(TDBID.ToNumber(indexTDBID), Profile.Create(ToString(handle), ToString(name), StringToName(ToString(logo)), ToString(primer1), ToString(primer2)));
+					hashMap.Insert(TDBID.ToNumber(indexTDBID), Profile.Create(ToString(handle), ToString(name), ResRef.FromString(ToString(logoPath)), StringToName(ToString(logo)), ToString(primer1), ToString(primer2)));
 				} else {
 					// The condition is defined, but not met; Remove profile from profileList so the button is not generated.
 					ArrayRemove(profileList, profile);
@@ -345,7 +351,7 @@ public class Chat extends Practice {
 		*/
 		let logo = new inkImage();
 		logo.SetName(n"logo");
-		logo.SetAtlasResource(chatPartnerIconPath());
+		logo.SetAtlasResource(r"");
 		logo.SetTexturePart(n""); // Hard-coded for the same reason as above: Some default value has to be set!
 		logo.SetAnchor(inkEAnchor.TopLeft);
 		logo.SetAnchorPoint(new Vector2(0.0, 0.0));
@@ -550,6 +556,7 @@ public class Chat extends Practice {
 		// Update other UI elements:
 		if NotEquals(this.m_displayedChatHandle, "(void)") {
 			this.m_nameDisplay.SetText(this.m_displayedChatName + "\n" + "(" + this.m_displayedChatHandle + ")");
+			this.m_logo.SetAtlasResource(this.m_displayedChatLogoPath);
 			this.m_logo.SetTexturePart(this.m_displayedChatLogo);
 			this.m_logo.SetSize(new Vector2(450.0 / 1.5, 450.0 / 1.5)); // Division for smaller images-
 		}
@@ -727,6 +734,7 @@ public class Chat extends Practice {
 			this.m_displayedChatProfile = buttonName;
 			this.m_displayedChatHandle = retrievedProfileTest.m_handle;
 			this.m_displayedChatName = retrievedProfileTest.m_name;
+			this.m_displayedChatLogoPath = retrievedProfileTest.m_logoPath;
 			this.m_displayedChatLogo = retrievedProfileTest.m_logo;
 			this.m_displayedChatPrimer1 = retrievedProfileTest.m_primer1;
 			this.m_displayedChatPrimer2 = retrievedProfileTest.m_primer2;
